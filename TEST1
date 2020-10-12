@@ -1,0 +1,27 @@
+# -*- coding: utf-8 -*-
+'''
+第一步:切割图片
+     每次选择一个模型；图片的大小；分成九个部分
+'''
+from PIL import Image
+import os
+
+model = r'C:\Users\86181\Desktop\无框字符\a_.jpg'  # 选取的图片
+output_save = r'C:\Users\86181\Desktop\test\ '  # 存放的位置
+
+img = Image.open(model)  # 打开图片
+img_size = img.size
+image_width = img.width  # 长宽确定
+image_heigth = img.height
+item_width = image_width / 3
+item_heigth = image_heigth / 3
+# Image.crop(left, up, right, below)
+box_list = []
+for i in range(3):  # i 表示长
+    for j in range(3):  # j表示宽
+        box = (item_width * j, item_heigth * i, item_width * (j + 1), item_heigth * (i + 1))
+        box_list.append(box)# 将图片转为列表
+        new_image = img.crop(box)
+        new_image.save(os.path.join(output_save + '{}{}.png'.format(i, j))
+                   )
+        # 得到九张图片
