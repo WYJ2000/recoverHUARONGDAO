@@ -1,0 +1,133 @@
+# -*- coding: utf-8 -*-
+# !/usr/bin/env python
+
+from enum import Enum
+
+Moving = Enum('Moving', ('LEFT', 'RIGHT', 'UP', 'DOWN'))
+
+# 深度优先搜索
+class HuaRongDao(object):
+	def __init__(self, numlist):
+		self.numlist = numlist
+		self.findZero()
+		self.movelist = []		# 移动步骤
+		self.winState = '[[1, 2, 3], [4, 5, 6], [7, 8, 0]]'		# 正确结果
+		self.allState = set()		# 每一步移动后的矩阵的状态
+
+	# 找到0所在行列
+	def findZero(self):
+		for i in self.numlist:
+			if 0 in i:
+				self.x = self.numlist.index(i)
+				self.y = i.index(0)
+			else:
+				pass
+
+	# 打印矩阵
+	def printNumlist(self):
+		for i in self.numlist:
+			print(i)
+		print("================")
+
+	# 判断是否可以向某个方向移动
+	def canMove(self, direction):
+		if Moving.LEFT.value == direction:
+			return self.y>0
+		if Moving.RIGHT.value == direction:
+			return self.y<2
+		if Moving.UP.value == direction:
+			return self.x>0
+		if Moving.DOWN.value == direction:
+			return self.x<2
+
+	# 向前移动
+	def move(self, direction):
+		if Moving.LEFT.value == direction:
+			self.numlist[self.x][self.y], self.numlist[self.x][self.y-1] = self.numlist[self.x][self.y-1], self.numlist[self.x][self.y]
+			self.y = self.y - 1
+		if Moving.RIGHT.value == direction:
+			self.numlist[self.x][self.y], self.numlist[self.x][self.y+1] = self.numlist[self.x][self.y+1], self.numlist[self.x][self.y]
+			self.y = self.y + 1
+		if Moving.UP.value == direction:
+			self.numlist[self.x][self.y], self.numlist[self.x-1][self.y] = self.numlist[self.x-1][self.y], self.numlist[self.x][self.y]
+			self.x = self.x - 1
+		if Moving.DOWN.value == direction:
+			self.numlist[self.x][self.y], self.numlist[self.x+1][self.y] = self.numlist[self.x+1][self.y], self.numlist[self.x][self.y]
+			self.x = self.x + 1
+		self.movelist.append(direction)
+
+	# 往后回退
+	def moveBack(self, direction):
+		if Moving.LEFT.value == direction:
+			self.numlist[self.x][self.y], self.numlist[self.x][self.y+1] = self.numlist[self.x][self.y+1], self.numlist[self.x][self.y]
+			self.y = self.y + 1
+		if Moving.RIGHT.value == direction:
+			self.numlist[self.x][self.y], self.numlist[self.x][self.y-1] = self.numlist[self.x][self.y-1], self.numlist[self.x][self.y]
+			self.y = self.y - 1
+		if Moving.UP.value == direction:
+			self.numlist[self.x][self.y], self.numlist[self.x+1][self.y] = self.numlist[self.x+1][self.y], self.numlist[self.x][self.y]
+			self.x = self.x + 1
+		if Moving.DOWN.value == direction:
+			self.numlist[self.x][self.y], self.numlist[self.x-1][self.y] = self.numlist[self.x-1][self.y], self.numlist[self.x][self.y]
+			self.x = self.x - 1
+		self.movelist.pop()
+
+	# 搜索所有可能
+	def search(self, direction):
+		# 添加len(self.movelist)<100判断，是为了防止多次递归导致的堆栈溢出
+		if self.canMove(direction) and len(self.movelist)<100:
+			self.move(direction)
+			if self.winState == str(self.numlist):
+				return True
+			if str(self.numlist) in self.allState:
+				self.moveBack(direction)
+				return False
+			self.allState.add(str(self.numlist))
+
+			searchAll = self.search(2) or self.search(4) or self.search(1) or self.search(3)
+			if searchAll:
+				return True
+			else:
+				self.moveBack(direction)
+				return False
+		else:
+			return False
+
+	# 寻找移动方式的入口
+	def solve(self):
+		if self.winState == str(str(self.numlist)):
+			return True
+		else:
+			self.allState.add(str(self.numlist))
+			return self.search(2) or self.search(4) or self.search(1) or self.search(3)
+
+	# 打印路径
+	def printRoute(self):
+		routelist = []
+		for direction in self.movelist:
+			if Moving.LEFT.value == direction:
+				routelist.append("左")
+			if Moving.RIGHT.value == direction:
+				routelist.append("右")
+			if Moving.UP.value == direction:
+				routelist.append("上")
+			if Moving.DOWN.value == direction:
+				routelist.append("下")
+		print(routelist)
+
+	# 程序入口
+	def testStart(self):
+		self.printNumlist()
+		if self.solve():
+			print("能！移动方式如下：")
+			self.printRoute()
+		else:
+			print("不能！")
+
+# 测试
+numlist = [[1,2,3],
+		[4,5,6],
+		[0,7,8]
+		]		# "失败！"
+huaRongDao = HuaRongDao(numlist)
+huaRongDao.testStart()
